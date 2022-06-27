@@ -1,0 +1,42 @@
+from getpass import getpass
+import paramiko
+import time
+ip=input("Entre la IP del device: ")
+USUARIO=input("Ingrese el name de usuario: ")
+password=getpass("Ingrese el password: ")
+print("Conectando Router con Paramiko...")
+cliente=paramiko.SSHClient()
+cliente.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+cliente.connect(hostname=ip,username=USUARIO,password=password)
+devices_access = cliente.invoke_shell()
+devices_access.send(b"conf t\n")
+devices_access.send(b"int g0/0\n")
+devices_access.send(b"no sh\n")
+devices_access.send(b"exit\n")
+devices_access.send(b"int g0/0.10\n")
+devices_access.send(b"encapsulation dot1q 10\n")
+devices_access.send(b"ip add 192.168.10.1 255.255.255.0\n")
+devices_access.send(b"exit\n")
+devices_access.send(b"int g0/0.20\n")
+devices_access.send(b"encapsulation dot1q 20\n")
+devices_access.send(b"ip add 192.168.20.1 255.255.255.0\n")
+devices_access.send(b"exit\n")
+devices_access.send(b"ip dhcp excluded-add 192.168.10.1\n")
+devices_access.send(b"ip dhcp excluded-add 192.168.20.1\n")
+devices_access.send(b"ip dhcp pool vlan10\n")
+devices_access.send(b"network 192.168.10.0 255.255.255.0\n")
+devices_access.send(b"default-router 192.168.10.1\n")
+devices_access.send(b"exit\n")
+devices_access.send(b"ip dhcp pool vlan20\n")
+devices_access.send(b"network 192.168.20.0 255.255.255.0\n")
+devices_access.send(b"default-router 192.168.20.1\n")
+devices_access.send(b"end\n")
+devices_access.send(b"wr me\n")
+
+time.sleep(5)
+output=devices_access.recv(3500)
+print(output.decode('ascii'))
+
+cliente.close()
+
+
