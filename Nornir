@@ -1,0 +1,18 @@
+from nornir import InitNornir, init_nornir
+from nornir_utils.plugins.functions import print_result
+from nornir_netmiko.tasks import netmiko_send_config, netmiko_send_command
+
+nr = InitNornir(
+    config_file="config.yaml", dry_run=True
+)
+#Open NX-OS Nexus 3k and 9K family of SWs
+nex1=nr.run(netmiko_send_config,config_file="Nexus")
+nex2=nr.run(netmiko_send_config,config_file="vlan")
+nex3=nr.run(netmiko_send_config,config_command=["int lo 6","description config con Nornir 3.1.0","ip add 6.6.6.6/32"])
+nex4=nr.run(netmiko_send_command,command_string="sh ip int br")
+nex5=nr.run(netmiko_send_command,command_string="sh vlan b")
+print_result(nex1)
+print_result(nex2)
+print_result(nex3)
+print_result(nex4)
+print_result(nex5)
